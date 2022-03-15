@@ -61,20 +61,35 @@ const park = (entry: Slot, vehicleSize: number, slots: Slot[][]) => {
   let prevRow = -1;
   let prevCol = -1;
 
-  for (let row = 0; row < ROWS; row++) {
+  // 1. Distance is valid
+  // 2. Slot is available
+  // 3. Vehicle size can fit
+  // 4. Not an entry
+  const isValid = (slot: Slot, distance: number, row: number, col: number) =>
+    prevDistance > distance &&
+    slot.available &&
+    vehicleSize <= slot.slotSize &&
+    !isEntry(row, col);
+
+  // Start from entry point to bottom
+  for (let row = entry.row; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
       const slot = slots[row][col];
       const distance = Math.abs(entry.row - row) + Math.abs(entry.col - col);
-      // 1. Distance is valid
-      // 2. Slot is available
-      // 3. Vehicle size can fit
-      // 4. Not an entry
-      if (
-        prevDistance > distance &&
-        slot.available &&
-        vehicleSize <= slot.slotSize &&
-        !isEntry(row, col)
-      ) {
+      if (isValid(slot, distance, row, col)) {
+        prevDistance = distance;
+        prevRow = row;
+        prevCol = col;
+      }
+    }
+  }
+
+  // Start from entry point to top
+  for (let row = entry.row; row >= 0; row--) {
+    for (let col = 0; col < COLS; col++) {
+      const slot = slots[row][col];
+      const distance = Math.abs(entry.row - row) + Math.abs(entry.col - col);
+      if (isValid(slot, distance, row, col)) {
         prevDistance = distance;
         prevRow = row;
         prevCol = col;
